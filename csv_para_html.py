@@ -199,8 +199,8 @@ def main() -> list:
     csv_arquivos = identifica_arquivos_csv()
     arq_ent = escolhe_arquivo_entrada(csv_arquivos)
     #
-    # Ref. Doc,Nome,Tipo Doc.,StatusAnterior,Status,Dt. Import.,Ult. Conf.
-    # 12/2023,Anderson Bornancim,Cartão ponto,Importado,Conferido,19/01/2024,01/02/2024
+    # A primeira linha é tratada como fonte de cabeçalhos (títulos, nomes dos campos)
+    # A segunda linha em diante são tratadas como informação efetiva
     cabecalhos, lista = le_databook(arq_ent)
 
     print("\n\n"+str(len(lista)) +
