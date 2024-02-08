@@ -11,7 +11,38 @@ def identifica_arquivos_csv() -> list:
     return lista_arquivos_csv
 
 
+def identify_delimiter(filename: str):
+    """
+    Identifies the delimiter used in a CSV file by counting commas and semicolons in the first five records.
+
+    Args:
+      filename: The name of the CSV file.
+
+    Returns:
+      The most likely delimiter character (',' or ';'), or None if neither is dominant.
+    """
+    comma_count = 0
+    semicolon_count = 0
+
+    with open(filename, 'r') as csvfile:
+        for _ in range(5):
+            try:
+                row = csvfile.readline()
+                comma_count += row.count(',')
+                semicolon_count += row.count(';')
+            except StopIteration:
+                # Fewer than 5 records, ignore
+                break
+    if comma_count > semicolon_count:
+        return ','
+    elif semicolon_count > comma_count:
+        return ';'
+    else:
+        return None
+
 # Use glob.glob to find "antes.html" files in the current directory
+
+
 def encontra_antes_html() -> bool:
     lista_arquivos_csv = glob.glob("antes.html")
     return len(lista_arquivos_csv) > 0
@@ -61,12 +92,12 @@ def escolhe_arquivo_entrada(x: list) -> str:
     return ("A determinar")
 
 
-def le_databook(nome_de_arquivo: str) -> tuple:
+def le_databook(nome_de_arquivo: str, delimitador: str) -> tuple:
     lista = []
     cabecalhos = []
     contador = -1
     with open(nome_de_arquivo, 'r', encoding='cp1252') as f:
-        reader = csv.reader(f, delimiter=',')
+        reader = csv.reader(f, delimiter=delimitador)
         for registro in reader:
             contador += 1
             if contador == 0:
@@ -198,10 +229,12 @@ def main() -> list:
     # lista de nomes de arquivo (com extensão ".csv")
     csv_arquivos = identifica_arquivos_csv()
     arq_ent = escolhe_arquivo_entrada(csv_arquivos)
+    # Supomos que seja vírgula ou ponto-e-vírgula
+    delimitador = identify_delimiter(arq_ent)
     #
-    # A primeira linha é tratada como fonte de cabeçalhos (títulos, nomes dos campos)
-    # A segunda linha em diante são tratadas como informação efetiva
-    cabecalhos, lista = le_databook(arq_ent)
+    # A primeira linha tem os cabeçalhos (títulos dos campos)
+    # Da segunda linha (registro) em diante tempos os valores dos campos
+    cabecalhos, lista = le_databook(arq_ent, delimitador)
 
     print("\n\n"+str(len(lista)) +
           " registros de foram encontrados no arquivo CSV e serão convertidos para uma tabela HTML com cabeçalho.")
